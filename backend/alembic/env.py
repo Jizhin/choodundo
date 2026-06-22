@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
 from app.config import settings
-from app.database import Base
+from app.database import Base, _build_engine_url
 from app import models  # noqa: F401  (ensure models are imported for autogenerate)
 
 config = context.config
@@ -18,7 +18,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-DB_URL = settings.database_url
+DB_URL, DB_CONNECT_ARGS = _build_engine_url(settings.database_url)
 
 
 def run_migrations_offline() -> None:
@@ -44,7 +44,7 @@ def do_run_migrations(connection) -> None:
 
 
 async def run_migrations_online() -> None:
-    connectable = create_async_engine(DB_URL, pool_pre_ping=True)
+    connectable = create_async_engine(DB_URL, pool_pre_ping=True, connect_args=DB_CONNECT_ARGS)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
