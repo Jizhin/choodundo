@@ -122,7 +122,6 @@ export default function LiveActivityPanel({ reportCount }: { reportCount?: numbe
   }, [data, mergeFeed]);
 
   const visible = feed.slice(0, 6);
-  const count = reportCount ?? feed.length;
 
   return (
     <div
