@@ -156,11 +156,6 @@ export default function LiveActivityPanel({ reportCount }: { reportCount?: numbe
             {lang === "ml" ? "തത്സമയ അപ്ഡേറ്റ്" : "LIVE UPDATES"}
           </span>
         </div>
-        {count > 0 && (
-          <span style={{ fontSize: "11px", color: "#FF8A00", fontWeight: 600, cursor: "pointer", fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit" }}>
-            {lang === "ml" ? "എല്ലാം കാണൂ" : "View all"}
-          </span>
-        )}
       </div>
 
       <div style={{ flex: 1, overflowY: "auto" }}>
