@@ -4,7 +4,7 @@ import { submitReport } from "../api/client";
 import { useStore } from "../store/useStore";
 import type { ReportStatus } from "../types";
 
-const COOLDOWN_MS = 15 * 60 * 1000;
+const COOLDOWN_MS = 5 * 60 * 1000;
 
 interface CardDef {
   icon: string;
@@ -125,7 +125,7 @@ export default function ReportButtons() {
             <button
               key={card.status}
               onClick={() => handleClick(card)}
-              disabled={isSubmitting}
+              disabled={isSubmitting || inCooldown}
               style={{
                 flex: 1,
                 height: "140px",
@@ -133,7 +133,7 @@ export default function ReportButtons() {
                 background: card.gradient,
                 color: "#FFFFFF",
                 border: inCooldown ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(255,255,255,0.12)",
-                cursor: isSubmitting ? "not-allowed" : "pointer",
+                cursor: isSubmitting || inCooldown ? "not-allowed" : "pointer",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
@@ -182,7 +182,7 @@ export default function ReportButtons() {
           <span style={{ fontSize: "12px", fontWeight: 600, color: "#F59E0B", fontFamily: lang === "ml" ? '"Noto Sans Malayalam", sans-serif' : "inherit" }}>
             {lang === "en"
               ? `Already reported — next report available in ${formatCountdown(remaining)}`
-              : `ഇതിനകം റിപ്പോർട്ട് ചെയ്തു — ${formatCountdown(remaining)} ൽ വീണ്ടും ചെയ്യാം`}
+              : `ഇതിനകം റിപ്പോർട്ട് ചെയ്തു — ${formatCountdown(remaining)} കഴിഞ്ഞ് ശ്രമിക്കൂ`}
           </span>
         </div>
       )}
