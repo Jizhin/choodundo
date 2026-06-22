@@ -3,6 +3,11 @@ import { useStore } from "../store/useStore";
 import type { WsEvent } from "../types";
 
 function wsUrl(): string {
+  const base = import.meta.env.VITE_API_BASE_URL;
+  if (base) {
+    const wsBase = base.replace(/^http/, "ws");
+    return `${wsBase}/ws/live`;
+  }
   const proto = window.location.protocol === "https:" ? "wss" : "ws";
   return `${proto}://${window.location.host}/ws/live`;
 }

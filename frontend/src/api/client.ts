@@ -12,8 +12,10 @@ import type {
   ReportSubmitResponse,
 } from "../types";
 
+const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: `${BASE}/api`,
   timeout: 12000,
 });
 
