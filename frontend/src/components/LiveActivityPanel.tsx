@@ -106,7 +106,7 @@ function FeedRow({ item, lang }: { item: FeedItem; lang: "en" | "ml" }) {
   );
 }
 
-export default function LiveActivityPanel({ reportCount }: { reportCount?: number }) {
+export default function LiveActivityPanel() {
   const feed = useStore((s) => s.feed);
   const mergeFeed = useStore((s) => s.mergeFeed);
   const lang = useStore((s) => s.lang);

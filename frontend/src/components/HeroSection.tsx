@@ -133,7 +133,7 @@ export default function HeroSection() {
         {/* RIGHT — fixed-height containers so layout never shifts with data */}
         <div className="hero-right-panels" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           <div className="hero-right-live-wrapper" style={{ height: "370px", flexShrink: 0 }}>
-            <LiveActivityPanel reportCount={reportCount} />
+            <LiveActivityPanel />
           </div>
           <div className="hero-right-top-wrapper" style={{ height: "210px", flexShrink: 0, overflow: "hidden" }}>
             <TopDistrictsPanel />
