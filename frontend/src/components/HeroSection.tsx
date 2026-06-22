@@ -3,16 +3,16 @@ import LiveActivityPanel from "./LiveActivityPanel";
 import TopDistrictsPanel from "./TopDistrictsPanel";
 import LocationBar from "./LocationBar";
 import ReportButtons from "./ReportButtons";
-import { fetchStats } from "../api/client";
+import { fetchDistricts } from "../api/client";
 import { useStore } from "../store/useStore";
 
 export default function HeroSection() {
-  const { data: stats } = useQuery({
-    queryKey: ["stats"],
-    queryFn: fetchStats,
+  const { data: districts } = useQuery({
+    queryKey: ["districts"],
+    queryFn: fetchDistricts,
     refetchInterval: 30_000,
   });
-  const reportCount = stats?.reports_last_2h ?? 0;
+  const reportCount = districts?.total_reports ?? 0;
   const lang = useStore((s) => s.lang);
 
   return (
@@ -71,7 +71,7 @@ export default function HeroSection() {
             </div>
             {reportCount > 0 && (
               <span style={{ fontSize: "12px", fontWeight: 700, color: "#FFFFFF", letterSpacing: "0.04em" }}>
-                {lang === "ml" ? `${reportCount} പേർ റിപ്പോർട്ട് ചെയ്യുന്നു` : `${reportCount} PEOPLE REPORTING`}
+                {lang === "ml" ? `${reportCount} റിപ്പോർട്ടുകൾ` : `${reportCount} TOTAL REPORTS`}
               </span>
             )}
           </div>
