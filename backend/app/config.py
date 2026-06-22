@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
 
     # Anti-spam / rate limiting
-    rate_limit_seconds: int = 15 * 60  # 15 minutes
+    rate_limit_seconds: int = 5 * 60  # 5 minutes
     decay_window_seconds: int = 2 * 60 * 60  # 2 hours
 
     # Redis keys / sizing
