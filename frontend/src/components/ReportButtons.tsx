@@ -74,14 +74,14 @@ export default function ReportButtons() {
       return submitReport(status, location);
     },
     onSuccess: (res) => {
-      setLastVotedAt(Date.now());
       if (res.accepted && res.report) {
+        setLastVotedAt(Date.now());
         prependFeed({ ...res.report, time: "Just now" });
         setToastType("success");
         setToast(lang === "en" ? "✓ Report submitted! Thank you." : "✓ റിപ്പോർട്ട് ലഭിച്ചു. നന്ദി!");
       } else {
         setToastType("error");
-        setToast(lang === "en" ? "⏱ Already reported recently — try again in ~15 min" : "⏱ ഇപ്പോൾ റിപ്പോർട്ട് ചെയ്തു — 15 മിനിറ്റ് കഴിഞ്ഞ് ശ്രമിക്കൂ");
+        setToast(lang === "en" ? "⏱ Already reported recently — try again in 5 min" : "⏱ ഇപ്പോൾ റിപ്പോർട്ട് ചെയ്തു — 5 മിനിറ്റ് കഴിഞ്ഞ് ശ്രമിക്കൂ");
       }
       queryClient.invalidateQueries({ queryKey: ["stats"] });
       queryClient.invalidateQueries({ queryKey: ["districts"] });
