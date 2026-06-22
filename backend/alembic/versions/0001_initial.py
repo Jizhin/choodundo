@@ -19,6 +19,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    bind = op.get_bind()
+    if bind.dialect.has_table(bind, "reports"):
+        return
     op.create_table(
         "reports",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
