@@ -1,0 +1,111 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-choodundo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-choodundo}
+      POSTGRES_DB: ${POSTGRES_DB:-choodundo}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-choodundo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - choodundo
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Enable AOF persistence as required by the spec.
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - choodundo
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-choodundo}:${POSTGRES_PASSWORD:-choodundo}@postgres:5432/${POSTGRES_DB:-choodundo}
+      REDIS_URL: redis://redis:6379/0
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
+      # Photon geocoder (search-as-you-type). Defaults to the public instance;
+      # point at the self-hosted `photon` service below for production.
+      PHOTON_URL: ${PHOTON_URL:-https://photon.komoot.io}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - choodundo
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - choodundo
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      # - "443:443"   # enable for TLS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      # - ./nginx/certs:/etc/nginx/certs:ro   # mount TLS certs here
+    depends_on:
+      - backend
+      - frontend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - choodundo
+
+  # --- Optional: self-hosted Photon geocoder (no rate limits) ---
+  # Requires a prebuilt Photon search index. For Kerala, import the India
+  # (or Kerala) OSM extract once, mount it at /photon/photon_data, then set
+  # PHOTON_URL=http://photon:2322 in .env. The index is large (GBs), so this
+  # is opt-in. See https://github.com/komoot/photon for index instructions.
+  #
+  # photon:
+  #   image: rtuszik/photon-docker:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     REGION: india        # filter the planet import down to India
+  #   volumes:
+  #     - photondata:/photon/photon_data
+  #   ports:
+  #     - "2322:2322"
+  #   networks:
+  #     - choodundo
+
+volumes:
+  pgdata:
+  redisdata:
+  # photondata:
+
+networks:
+  choodundo:
+    driver: bridge
