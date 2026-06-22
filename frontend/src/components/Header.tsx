@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchStats } from "../api/client";
+import { fetchDistricts } from "../api/client";
 import { useStore } from "../store/useStore";
 
 export default function Header() {
-  const { data: stats } = useQuery({
-    queryKey: ["stats"],
-    queryFn: fetchStats,
+  const { data: districts } = useQuery({
+    queryKey: ["districts"],
+    queryFn: fetchDistricts,
     refetchInterval: 30_000,
   });
-  const reportCount = stats?.reports_last_2h ?? 0;
+  const reportCount = districts?.total_reports ?? 0;
   const lang = useStore((s) => s.lang);
   const setLang = useStore((s) => s.setLang);
 
@@ -89,7 +89,7 @@ export default function Header() {
         </div>
         {reportCount > 0 && (
           <span className="header-count" style={{ fontSize: "13px", color: "#C5C5C5", fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit" }}>
-            {reportCount} {lang === "ml" ? "പേർ റിപ്പോർട്ട് ചെയ്യുന്നു" : "people reporting"}
+            {reportCount} {lang === "ml" ? "റിപ്പോർട്ടുകൾ" : "total reports"}
           </span>
         )}
       </div>
