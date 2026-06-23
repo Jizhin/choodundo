@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
 import DistrictGrid from "./components/DistrictGrid";
 import MinimalFooter from "./components/MinimalFooter";
+import UpdateBanner from "./components/UpdateBanner";
 
 export default function App() {
   useLiveSocket();
@@ -16,6 +17,7 @@ export default function App() {
       }}
     >
       <Header />
+      <UpdateBanner />
       <HeroSection />
       <div className="page-side-padding" style={{ padding: "20px 24px 0" }}>
         <DistrictGrid />

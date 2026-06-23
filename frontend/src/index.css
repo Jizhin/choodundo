@@ -118,6 +118,11 @@ body {
   animation: blink-yellow 1.8s ease-in-out infinite;
 }
 
+@keyframes slideInRight {
+  0%   { transform: translateX(120%); opacity: 0; }
+  100% { transform: translateX(0);    opacity: 1; }
+}
+
 @keyframes flip-in {
   0%   { transform: perspective(300px) rotateX(-80deg); opacity: 0; }
   100% { transform: perspective(300px) rotateX(0deg);   opacity: 1; }
