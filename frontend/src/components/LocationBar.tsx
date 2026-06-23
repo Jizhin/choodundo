@@ -105,7 +105,9 @@ export default function LocationBar() {
           }}
         >
           {detecting ? <Loader2 size={12} className="animate-spin" /> : <LocateFixed size={12} />}
-          {lang === "ml" ? "എന്റെ ലൊക്കേഷൻ ഉപയോഗിക്കൂ" : "Use my current location"}
+          <span className="location-detect-text">
+            {lang === "ml" ? "എന്റെ ലൊക്കേഷൻ ഉപയോഗിക്കൂ" : "Use my current location"}
+          </span>
         </button>
       </div>
 

@@ -7,6 +7,7 @@ export default function UpdateBanner() {
 
   return (
     <div
+      className="update-banner"
       style={{
         position: "fixed",
         top: "84px",

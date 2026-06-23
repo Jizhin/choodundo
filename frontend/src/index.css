@@ -144,7 +144,12 @@ body {
 @media (max-width: 600px) {
   .district-grid-css {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
+    gap: 8px !important;
+  }
+}
+@media (max-width: 400px) {
+  .district-grid-css {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -152,43 +157,64 @@ body {
 @media (max-width: 960px) {
   .hero-grid {
     grid-template-columns: 1fr !important;
-    gap: 20px !important;
+    gap: 16px !important;
   }
   /* Right panels side-by-side on tablet */
   .hero-right-panels { flex-direction: row !important; }
-  .hero-right-live-wrapper { flex: 1; height: 200px !important; }
-  .hero-right-top-wrapper  { flex: 1; height: 200px !important; overflow: hidden; }
+  .hero-right-live-wrapper { flex: 1; height: 220px !important; }
+  .hero-right-top-wrapper  { flex: 1; height: 220px !important; overflow: hidden; }
 }
 @media (max-width: 640px) {
-  .hero-grid { padding: 20px 16px !important; }
-  /* Right panels stack again on phone */
-  .hero-right-panels { flex-direction: column !important; }
-  .hero-right-live-wrapper { flex: none; height: 200px !important; }
-  .hero-right-top-wrapper  { flex: none; height: 240px !important; }
+  .hero-grid { padding: 16px !important; }
+  /* Right panels stack on phone */
+  .hero-right-panels { flex-direction: column !important; gap: 10px !important; }
+  .hero-right-live-wrapper { flex: none !important; height: 260px !important; }
+  .hero-right-top-wrapper  { flex: none !important; height: 210px !important; }
   /* Title */
   .hero-title-text {
-    font-size: 38px !important;
+    font-size: 36px !important;
     letter-spacing: -0.5px !important;
+    margin-bottom: 8px !important;
   }
   /* Subtitle */
-  .hero-subtitle { font-size: 13px !important; }
+  .hero-subtitle { font-size: 12px !important; margin-bottom: 14px !important; }
 }
 
-/* Header: hide count text on small screens */
+/* Header: hide count text on small screens, tighter padding */
 @media (max-width: 640px) {
   .header-count { display: none !important; }
 }
+@media (max-width: 380px) {
+  .header-inner { padding: 0 12px !important; gap: 10px !important; }
+}
 
-/* Report cards: stack on phone */
-@media (max-width: 600px) {
-  .report-cards-row { flex-direction: column !important; }
+/* Report cards: STAY in row on mobile, just shorter */
+@media (max-width: 640px) {
+  .report-cards-row { flex-direction: row !important; gap: 8px !important; }
+  .report-card-item { height: 112px !important; padding: 10px !important; }
+}
+
+/* Location bar: hide long text on small screens, show just icon */
+@media (max-width: 480px) {
+  .location-detect-text { display: none !important; }
+}
+
+/* Update banner: stretch across screen on mobile */
+@media (max-width: 640px) {
+  .update-banner {
+    left: 12px !important;
+    right: 12px !important;
+    max-width: none !important;
+    top: 80px !important;
+  }
 }
 
 /* Page section padding: tighter on phone */
 @media (max-width: 640px) {
   .page-side-padding {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-top: 14px !important;
   }
 }
 

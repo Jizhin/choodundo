@@ -124,6 +124,7 @@ export default function ReportButtons() {
           return (
             <button
               key={card.status}
+              className="report-card-item"
               onClick={() => handleClick(card)}
               disabled={isSubmitting || inCooldown}
               style={{

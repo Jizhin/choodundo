@@ -46,7 +46,7 @@ export default function Header() {
       </div>
 
       {/* Right */}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div className="header-inner" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
         {/* EN / ML toggle */}
         <div
           style={{
