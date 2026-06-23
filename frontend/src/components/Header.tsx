@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchDistricts } from "../api/client";
 import { useStore } from "../store/useStore";
-import { useOnlineUsers } from "../hooks/useOnlineUsers";
 
 export default function Header() {
   const { data: districts } = useQuery({
@@ -12,7 +11,6 @@ export default function Header() {
   const reportCount = districts?.total_reports ?? 0;
   const lang = useStore((s) => s.lang);
   const setLang = useStore((s) => s.setLang);
-  const onlineCount = useOnlineUsers();
 
   return (
     <header
@@ -93,14 +91,6 @@ export default function Header() {
           <span className="header-count" style={{ fontSize: "13px", color: "#C5C5C5", fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit" }}>
             {reportCount} {lang === "ml" ? "റിപ്പോർട്ടുകൾ" : "total reports"}
           </span>
-        )}
-        {onlineCount > 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: "5px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "20px", padding: "3px 10px" }}>
-            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ADE80", display: "inline-block", flexShrink: 0 }} />
-            <span style={{ fontSize: "12px", fontWeight: 600, color: "#C5C5C5" }}>
-              {onlineCount} {lang === "ml" ? "പേർ ഓൺലൈൻ" : "online"}
-            </span>
-          </div>
         )}
       </div>
     </header>
