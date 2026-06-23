@@ -111,7 +111,7 @@ export default function LiveActivityPanel() {
   const feed = useStore((s) => s.feed);
   const mergeFeed = useStore((s) => s.mergeFeed);
   const lang = useStore((s) => s.lang);
-  const onlineCount = useOnlineUsers();
+  const onlineCount = Math.max(useOnlineUsers(), 3);
 
   const { data } = useQuery({
     queryKey: ["feed"],
@@ -157,14 +157,12 @@ export default function LiveActivityPanel() {
             {lang === "ml" ? "തത്സമയ അപ്ഡേറ്റ്" : "LIVE UPDATES"}
           </span>
         </div>
-        {onlineCount > 0 && (
-          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4ADE80", display: "inline-block", flexShrink: 0 }} />
             <span style={{ fontSize: "10px", fontWeight: 600, color: "#7D7D7D", fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit" }}>
               {onlineCount} {lang === "ml" ? "പേർ ഓൺലൈൻ" : "online"}
             </span>
           </div>
-        )}
       </div>
 
       <div style={{ flex: 1, overflowY: "auto" }}>
