@@ -68,3 +68,22 @@ async def get_feed(limit: int = 50) -> list[dict[str, Any]]:
 
 def district_key(district: str) -> str:
     return f"district:{district.lower().replace(' ', '_')}"
+
+
+# ---- Active users (sorted set keyed by last-seen timestamp) ----
+
+ACTIVE_USERS_KEY = "choodundo:active_users"
+ACTIVE_TTL_SECONDS = 120  # remove sessions not seen for 2 min
+
+
+async def heartbeat(session_id: str) -> int:
+    """Mark session as active and return current online count."""
+    import time
+    r = get_redis()
+    now = int(time.time())
+    pipe = r.pipeline()
+    pipe.zadd(ACTIVE_USERS_KEY, {session_id: now})
+    pipe.zremrangebyscore(ACTIVE_USERS_KEY, 0, now - ACTIVE_TTL_SECONDS)
+    pipe.zcard(ACTIVE_USERS_KEY)
+    results = await pipe.execute()
+    return int(results[2])

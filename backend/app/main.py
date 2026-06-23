@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import Base, engine
 from app.redis_client import close_redis, get_redis
-from app.routers import districts, feed, location, reports, stats, ws
+from app.routers import districts, feed, location, presence, reports, stats, ws
 
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,
@@ -57,6 +57,7 @@ app.include_router(districts.router)
 app.include_router(location.router)
 app.include_router(stats.router)
 app.include_router(ws.router)
+app.include_router(presence.router)
 
 
 @app.get("/health", tags=["health"])

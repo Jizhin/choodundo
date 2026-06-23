@@ -80,3 +80,8 @@ export async function detectLocation(
   });
   return data;
 }
+
+export async function sendHeartbeat(sessionId: string): Promise<number> {
+  const { data } = await api.post<{ online: number }>("/heartbeat", { session_id: sessionId });
+  return data.online;
+}
