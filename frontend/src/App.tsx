@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import { useLiveSocket } from "./hooks/useLiveSocket";
 import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
@@ -25,6 +26,7 @@ export default function App() {
       <div style={{ marginTop: "24px" }}>
         <MinimalFooter />
       </div>
+      <Analytics />
     </div>
   );
 }
