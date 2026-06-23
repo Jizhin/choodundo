@@ -123,7 +123,7 @@ export default function LiveActivityPanel() {
     if (data) mergeFeed(data);
   }, [data, mergeFeed]);
 
-  const visible = feed.slice(0, 6);
+  const visible = feed.slice(0, 5);
 
   return (
     <div
