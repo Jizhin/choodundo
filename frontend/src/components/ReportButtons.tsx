@@ -156,7 +156,7 @@ export default function ReportButtons() {
               <span style={{ fontSize: "28px", lineHeight: 1 }}>{card.icon}</span>
               <div>
                 <p style={{ margin: 0, fontSize: lang === "ml" ? "14px" : "16px", fontWeight: 700, lineHeight: 1.2 }}>{text.label}</p>
-                <p style={{ margin: "3px 0 0", fontSize: lang === "ml" ? "10px" : "11px", opacity: 0.80, lineHeight: 1.3 }}>{text.sub}</p>
+                <p className="report-card-sub" style={{ margin: "3px 0 0", fontSize: lang === "ml" ? "10px" : "11px", opacity: 0.80, lineHeight: 1.3 }}>{text.sub}</p>
               </div>
               <div style={{ fontSize: "11px", fontWeight: 700, opacity: 0.85 }}>
                 {isSubmitting ? submittingText : reportNowText}

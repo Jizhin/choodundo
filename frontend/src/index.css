@@ -200,7 +200,8 @@ body {
 /* Report cards: STAY in row on mobile, just shorter */
 @media (max-width: 640px) {
   .report-cards-row { flex-direction: row !important; gap: 8px !important; }
-  .report-card-item { height: 112px !important; padding: 10px !important; }
+  .report-card-item { height: 112px !important; padding: 10px !important; overflow: hidden !important; }
+  .report-card-sub { display: none !important; }
 }
 
 /* Location bar: hide long text on small screens, show just icon */
