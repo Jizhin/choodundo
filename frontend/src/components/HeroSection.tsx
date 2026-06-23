@@ -16,7 +16,7 @@ export default function HeroSection() {
   const lang = useStore((s) => s.lang);
 
   return (
-    <div style={{ position: "relative", overflow: "hidden" }}>
+    <div style={{ position: "relative", overflow: "hidden", width: "100%" }}>
       {/* Background image */}
       <div
         style={{
@@ -47,9 +47,9 @@ export default function HeroSection() {
         }}
       >
         {/* LEFT */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
           {/* Top badges */}
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+          <div className="hero-live-badge-row" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
             <div
               style={{
                 display: "inline-flex",
@@ -131,7 +131,7 @@ export default function HeroSection() {
         </div>
 
         {/* RIGHT — fixed-height containers so layout never shifts with data */}
-        <div className="hero-right-panels" style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="hero-right-panels" style={{ display: "flex", flexDirection: "column", gap: "12px", minWidth: 0 }}>
           <div className="hero-right-live-wrapper" style={{ height: "360px", flexShrink: 0 }}>
             <LiveActivityPanel />
           </div>

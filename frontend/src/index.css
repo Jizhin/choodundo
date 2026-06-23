@@ -12,8 +12,13 @@ body,
   height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
+  overflow-x: hidden;
   background: #050505;
   color: #FFFFFF;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -159,6 +164,7 @@ body {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
+  .hero-grid > * { min-width: 0; max-width: 100%; }
   /* Right panels side-by-side on tablet */
   .hero-right-panels { flex-direction: row !important; }
   .hero-right-live-wrapper { flex: 1; height: 220px !important; }
@@ -166,18 +172,21 @@ body {
 }
 @media (max-width: 640px) {
   .hero-grid { padding: 16px !important; }
+  .hero-grid > * { min-width: 0; max-width: 100%; }
   /* Right panels stack on phone */
   .hero-right-panels { flex-direction: column !important; gap: 10px !important; }
-  .hero-right-live-wrapper { flex: none !important; height: 260px !important; }
-  .hero-right-top-wrapper  { flex: none !important; height: 210px !important; }
+  .hero-right-live-wrapper { flex: none !important; height: 260px !important; overflow: hidden; }
+  .hero-right-top-wrapper  { flex: none !important; height: 210px !important; overflow: hidden; }
   /* Title */
   .hero-title-text {
     font-size: 36px !important;
     letter-spacing: -0.5px !important;
     margin-bottom: 8px !important;
   }
-  /* Subtitle */
-  .hero-subtitle { font-size: 12px !important; margin-bottom: 14px !important; }
+  /* Hide subtitle on mobile to keep title visible in viewport */
+  .hero-subtitle { display: none !important; }
+  /* Tighter LIVE badge margin on mobile */
+  .hero-live-badge-row { margin-bottom: 10px !important; }
 }
 
 /* Header: hide count text on small screens, tighter padding */
