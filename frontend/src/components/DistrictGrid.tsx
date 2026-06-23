@@ -143,7 +143,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
         background: "#0A0A0A",
         border: "1px solid rgba(255,255,255,0.38)",
         borderRadius: "4px",
-        padding: "12px",
+        padding: "10px",
         display: "flex",
         flexDirection: "column",
         transition: "border-color 0.15s ease",
@@ -154,7 +154,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.38)"; }}
     >
       {/* Row 1: name + hot% */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "6px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "4px" }}>
         <span
           style={{
             fontFamily: '"Manjari", "Noto Sans Malayalam", "Inter", sans-serif',
@@ -174,7 +174,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
       </div>
 
       {/* Row 2: Sparkline or no-data flat line */}
-      <div style={{ marginBottom: "6px" }}>
+      <div style={{ marginBottom: "4px" }}>
         {hasData && sparkPath ? (
           <svg width="100%" height="28" viewBox="0 0 100 28" preserveAspectRatio="none" style={{ display: "block" }}>
             <defs>
@@ -194,7 +194,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
       </div>
 
       {/* Row 3: status badge */}
-      <div style={{ marginBottom: "8px" }}>
+      <div style={{ marginBottom: "5px" }}>
         <span
           style={{
             fontSize: "9px",
@@ -214,7 +214,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
       </div>
 
       {/* Row 4: stats compact row */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "3px" }}>
           <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#FF3B30", display: "inline-block", flexShrink: 0 }} />
           <span style={{ fontSize: "13px", fontWeight: 800, color: "#FF3B30", lineHeight: 1 }}>{d.extreme_hot}</span>
@@ -233,7 +233,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
       </div>
 
       {/* Temperature grid — stacked cells: EXT red / HOT orange / NORMAL green */}
-      <div style={{ display: "flex", gap: "2px", marginBottom: "6px" }}>
+      <div style={{ display: "flex", gap: "2px", marginBottom: "4px" }}>
         {(() => {
           if (d.total === 0) {
             return Array.from({ length: 10 }, (_, i) => (
@@ -256,7 +256,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
       </div>
 
       {/* Divider */}
-      <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", marginBottom: "8px" }} />
+      <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", marginBottom: "5px" }} />
 
       {/* Latest reports */}
       <div>
@@ -266,7 +266,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
           </span>
           <span style={{ fontSize: "12px", color: "#7D7D7D" }}>↻</span>
         </div>
-        <div style={{ height: "34px", overflow: "hidden" }}>
+        <div style={{ height: "30px", overflow: "hidden" }}>
           <LatestReports district={d.district} feed={feed} lang={lang} />
         </div>
       </div>
@@ -314,7 +314,7 @@ export default function DistrictGrid() {
         {isLoading ? (
           <p style={{ color: "#7D7D7D", fontSize: "13px" }}>Loading districts…</p>
         ) : (
-          <div className="district-grid-css" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "16px" }}>
+          <div className="district-grid-css" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}>
             {districts.map((d: DistrictSummary) => (
               <DistrictCard key={d.district} d={d} feed={feed} lang={lang} onOpen={() => setSelected(d)} />
             ))}
