@@ -56,7 +56,7 @@ function getFlipLabel(item: FeedItem, lang: "en" | "ml"): string {
   return lang === "ml" ? "ചൂടില്ല" : "NOT HOT";
 }
 
-function LatestReports({ district, feed, lang }: { district: string; feed: FeedItem[]; lang: "en" | "ml" }) {
+function LatestReports({ district, feed, latestReport, lang }: { district: string; feed: FeedItem[]; latestReport?: FeedItem | null; lang: "en" | "ml" }) {
   const districtItems = useMemo(
     () => feed.filter((f) => f.district.toLowerCase() === district.toLowerCase()),
     [feed, district]
@@ -69,7 +69,10 @@ function LatestReports({ district, feed, lang }: { district: string; feed: FeedI
     return () => clearInterval(id);
   }, [districtItems.length]);
 
-  if (districtItems.length === 0) {
+  // Feed store has live submitted reports; fall back to the per-district latest from the API
+  const items = districtItems.length > 0 ? districtItems : latestReport ? [latestReport] : [];
+
+  if (items.length === 0) {
     return (
       <p className="blink-yellow" style={{ margin: 0, fontSize: "10px", fontWeight: 600, color: "#F59E0B", lineHeight: "34px", fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit" }}>
         {lang === "ml" ? "ഇതുവരെ ഒന്നുമില്ല" : "No reports yet"}
@@ -77,7 +80,7 @@ function LatestReports({ district, feed, lang }: { district: string; feed: FeedI
     );
   }
 
-  const item = districtItems[idx % districtItems.length];
+  const item = items[Math.min(idx, items.length - 1)];
   const label = getFlipLabel(item, lang);
   const color = getFlipColor(item);
   const isHot = item.status !== "NORMAL";
@@ -113,7 +116,7 @@ function LatestReports({ district, feed, lang }: { district: string; feed: FeedI
   );
 }
 
-function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: FeedItem[]; lang: "en" | "ml"; onOpen: () => void }) {
+function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: FeedItem[]; lang: "en" | "ml"; onOpen: () => void; }) {
   const cfg = LEVEL_CFG[d.level] ?? LEVEL_CFG.GRAY;
   const hasData = d.total > 0;
   const gradId = `g${d.district.replace(/\W/g, '')}`;
@@ -267,7 +270,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
           <span style={{ fontSize: "12px", color: "#7D7D7D" }}>↻</span>
         </div>
         <div style={{ height: "30px", overflow: "hidden" }}>
-          <LatestReports district={d.district} feed={feed} lang={lang} />
+          <LatestReports district={d.district} feed={feed} latestReport={d.latest_report} lang={lang} />
         </div>
       </div>
     </div>

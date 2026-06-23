@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.data.kerala import DISTRICTS
 from app.models import Report
-from app.schemas import DistrictSummary
-from app.utils import level_from_percentage
+from app.schemas import DistrictSummary, FeedItem
+from app.utils import level_from_percentage, relative_time
 
 
 # Kerala local time (IST) for "today" boundaries.
@@ -117,6 +117,20 @@ async def get_district_summaries(db: AsyncSession) -> tuple[list[DistrictSummary
         if district in tally and status in ("HOT", "EXTREME_HOT", "NORMAL"):
             tally[district][status] += int(cnt)
 
+    # Latest report per district (most recent report regardless of window)
+    latest_subq = (
+        select(Report.district, func.max(Report.created_at).label("max_ts"))
+        .group_by(Report.district)
+        .subquery()
+    )
+    latest_stmt = select(Report).join(
+        latest_subq,
+        (Report.district == latest_subq.c.district)
+        & (Report.created_at == latest_subq.c.max_ts),
+    )
+    latest_rows = (await db.execute(latest_stmt)).scalars().all()
+    latest_map: dict[str, Report] = {r.district: r for r in latest_rows}
+
     summaries: list[DistrictSummary] = []
     grand_total = 0
     for district in DISTRICTS:
@@ -128,6 +142,19 @@ async def get_district_summaries(db: AsyncSession) -> tuple[list[DistrictSummary
         combined_hot = hot + extreme_hot
         pct = int(round((combined_hot / total) * 100)) if total > 0 else 0
         hourly = [hourly_map[district].get(h, 0) for h in range(24)]
+
+        latest_feed: FeedItem | None = None
+        if lr := latest_map.get(district):
+            latest_feed = FeedItem(
+                id=str(lr.id),
+                status=lr.status,
+                name="Anonymous",
+                place=lr.place_name,
+                district=lr.district,
+                created_at=lr.created_at.isoformat(),
+                time=relative_time(lr.created_at),
+            )
+
         summaries.append(
             DistrictSummary(
                 district=district,
@@ -138,6 +165,7 @@ async def get_district_summaries(db: AsyncSession) -> tuple[list[DistrictSummary
                 hot_percentage=pct,
                 level=level_from_percentage(pct) if total > 0 else "GRAY",
                 hourly=hourly,
+                latest_report=latest_feed,
             )
         )
     return summaries, grand_total

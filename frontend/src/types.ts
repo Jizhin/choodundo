@@ -22,6 +22,7 @@ export interface DistrictSummary {
   hot_percentage: number;
   level: DistrictLevel;
   hourly: number[];  // hot counts per IST hour (0-23) for last 24h
+  latest_report?: FeedItem | null;
 }
 
 export interface DistrictsResponse {

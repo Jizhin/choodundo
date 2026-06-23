@@ -59,6 +59,7 @@ class DistrictSummary(BaseModel):
     hot_percentage: int
     level: str  # RED | ORANGE | GRAY
     hourly: list[int]  # hot report counts per IST hour (0-23) for last 24h, for sparkline
+    latest_report: FeedItem | None = None
 
 
 class DistrictsResponse(BaseModel):
