@@ -140,6 +140,7 @@ body {
 /* ===== RESPONSIVE LAYOUT ===== */
 
 /* District grid */
+.district-grid-css > * { min-width: 0; }
 @media (max-width: 1280px) {
   .district-grid-css { grid-template-columns: repeat(4, 1fr) !important; }
 }

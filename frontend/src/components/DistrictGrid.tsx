@@ -151,6 +151,8 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
         flexDirection: "column",
         transition: "border-color 0.15s ease",
         cursor: "pointer",
+        overflow: "hidden",
+        minWidth: 0,
       }}
       onClick={onOpen}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = cfg.hoverBdr; }}

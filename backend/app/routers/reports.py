@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import func, select
@@ -17,6 +18,27 @@ from app.utils import compute_user_hash, random_name, relative_time
 from app.websocket_manager import manager
 
 logger = logging.getLogger("choodundo.reports")
+
+_HTML_RE = re.compile(r"<[^>]+>")
+# Must have letters (ASCII or Malayalam unicode block U+0D00–U+0D7F)
+_LETTER_RE = re.compile(r"[a-zA-Zഀ-ൿ]")
+
+
+def _sanitize_place(name: str) -> str | None:
+    """Return cleaned place name, or None if it looks like spam/injection."""
+    name = name.strip()
+    # Strip HTML tags first so XSS attempts don't pass the checks below
+    if _HTML_RE.search(name):
+        return None
+    # Must contain at least one letter (not just digits/symbols/repeated chars)
+    if not _LETTER_RE.search(name):
+        return None
+    # Reject strings that are >70% the same character (e.g. "BBBBB...")
+    if len(name) > 4:
+        most_common = max(name.lower(), key=name.lower().count)
+        if name.lower().count(most_common) / len(name) > 0.70:
+            return None
+    return name
 
 router = APIRouter(prefix="/api", tags=["reports"])
 
@@ -39,13 +61,30 @@ async def submit_report(
             message="Your report was received.",
         )
 
-    # Normalise the district to one of the 14 canonical buckets.
-    district = normalize_district(payload.district) or payload.district.strip().title()
+    # Validate district — must be one of the 14 Kerala districts.
+    district = normalize_district(payload.district)
+    if district is None:
+        logger.warning("rejected report with unknown district=%r", payload.district)
+        return ReportSubmitResponse(
+            success=True,
+            accepted=False,
+            message="Your report was received.",
+        )
+
+    # Validate and sanitize place_name — reject spam/injection attempts.
+    place_name = _sanitize_place(payload.place_name)
+    if place_name is None:
+        logger.warning("rejected report with invalid place_name=%r", payload.place_name[:40])
+        return ReportSubmitResponse(
+            success=True,
+            accepted=False,
+            message="Your report was received.",
+        )
 
     report = await create_report(
         db,
         status=payload.status.value,
-        place_name=payload.place_name.strip(),
+        place_name=place_name,
         district=district,
         pincode=payload.pincode,
         latitude=payload.latitude,
