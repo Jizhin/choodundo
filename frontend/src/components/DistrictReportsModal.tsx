@@ -196,16 +196,18 @@ export default function DistrictReportsModal({ district, level, onClose }: Props
           </button>
         </div>
 
-        {/* Place filter chips */}
+        {/* Place filter chips — single horizontal scrollable row */}
         {places.length > 1 && (
           <div
             style={{
               padding: "10px 20px",
               borderBottom: "1px solid rgba(255,255,255,0.08)",
               display: "flex",
-              flexWrap: "wrap",
+              flexWrap: "nowrap",
               gap: "6px",
               flexShrink: 0,
+              overflowX: "auto",
+              WebkitOverflowScrolling: "touch",
             }}
           >
             {[null, ...places].map((place) => {
@@ -224,6 +226,8 @@ export default function DistrictReportsModal({ district, level, onClose }: Props
                     background: active ? "rgba(255,152,0,0.20)" : "rgba(255,255,255,0.06)",
                     border: active ? "1px solid rgba(255,152,0,0.50)" : "1px solid rgba(255,255,255,0.12)",
                     color: active ? "#FF9800" : "#C5C5C5",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {place ?? (lang === "ml" ? "എല്ലാ സ്ഥലങ്ങളും" : "All places")}
