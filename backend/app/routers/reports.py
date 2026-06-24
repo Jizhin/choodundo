@@ -20,24 +20,27 @@ from app.websocket_manager import manager
 logger = logging.getLogger("choodundo.reports")
 
 _HTML_RE = re.compile(r"<[^>]+>")
-# Must have letters (ASCII or Malayalam unicode block U+0D00–U+0D7F)
 _LETTER_RE = re.compile(r"[a-zA-Zഀ-ൿ]")
+# ALL-CAPS with no spaces and no lowercase = dictionary-word spam (ALLOCATIONS, ABRAM, etc.)
+_ALL_CAPS_RE = re.compile(r"^[A-Z'.\-]+$")
 
 
 def _sanitize_place(name: str) -> str | None:
     """Return cleaned place name, or None if it looks like spam/injection."""
     name = name.strip()
-    # Strip HTML tags first so XSS attempts don't pass the checks below
     if _HTML_RE.search(name):
         return None
-    # Must contain at least one letter (not just digits/symbols/repeated chars)
     if not _LETTER_RE.search(name):
         return None
-    # Reject strings that are >70% the same character (e.g. "BBBBB...")
+    # Reject strings that are >70% the same character (BBBBB...)
     if len(name) > 4:
-        most_common = max(name.lower(), key=name.lower().count)
-        if name.lower().count(most_common) / len(name) > 0.70:
+        lower = name.lower()
+        most_common = max(set(lower), key=lower.count)
+        if lower.count(most_common) / len(lower) > 0.70:
             return None
+    # Reject ALL-CAPS no-space words — real Kerala places always have mixed case or spaces
+    if len(name) > 4 and _ALL_CAPS_RE.match(name):
+        return None
     return name
 
 router = APIRouter(prefix="/api", tags=["reports"])
