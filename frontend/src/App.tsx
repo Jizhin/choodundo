@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { useLiveSocket } from "./hooks/useLiveSocket";
 import Header from "./components/Header";
@@ -5,9 +6,14 @@ import HeroSection from "./components/HeroSection";
 import DistrictGrid from "./components/DistrictGrid";
 import MinimalFooter from "./components/MinimalFooter";
 import UpdateBanner from "./components/UpdateBanner";
+import WelcomeScreen from "./components/WelcomeScreen";
+
+const SEEN_KEY = "cu_welcome_seen";
 
 export default function App() {
   useLiveSocket();
+  const [showWelcome, setShowWelcome] = useState(() => !sessionStorage.getItem(SEEN_KEY));
+
   return (
     <div
       style={{
@@ -17,6 +23,7 @@ export default function App() {
         fontFamily: '"Inter", system-ui, sans-serif',
       }}
     >
+      {showWelcome && <WelcomeScreen onDone={() => setShowWelcome(false)} />}
       <Header />
       <UpdateBanner />
       <HeroSection />
