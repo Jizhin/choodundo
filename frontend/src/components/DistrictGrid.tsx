@@ -5,6 +5,63 @@ import { fetchDistricts } from "../api/client";
 import type { DistrictSummary, DistrictLevel, FeedItem } from "../types";
 import DistrictReportsModal from "./DistrictReportsModal";
 
+/* ── Open-Meteo weather temps ───────────────────────────────── */
+const DISTRICT_GEO: Record<string, { lat: number; lon: number }> = {
+  Kasaragod:          { lat: 12.4996, lon: 74.9869 },
+  Kannur:             { lat: 11.8745, lon: 75.3704 },
+  Wayanad:            { lat: 11.6854, lon: 76.1320 },
+  Kozhikode:          { lat: 11.2588, lon: 75.7804 },
+  Malappuram:         { lat: 11.0510, lon: 76.0711 },
+  Palakkad:           { lat: 10.7867, lon: 76.6548 },
+  Thrissur:           { lat: 10.5276, lon: 76.2144 },
+  Ernakulam:          { lat:  9.9312, lon: 76.2673 },
+  Idukki:             { lat:  9.9189, lon: 76.9705 },
+  Kottayam:           { lat:  9.5916, lon: 76.5222 },
+  Alappuzha:          { lat:  9.4981, lon: 76.3388 },
+  Pathanamthitta:     { lat:  9.2648, lon: 76.7870 },
+  Kollam:             { lat:  8.8932, lon: 76.6141 },
+  Thiruvananthapuram: { lat:  8.5241, lon: 76.9366 },
+};
+
+const WX_KEY = "cu_wx_v1";
+const WX_TTL = 30 * 60 * 1000;
+
+function wxGet(): Record<string, number> | null {
+  try {
+    const raw = sessionStorage.getItem(WX_KEY);
+    if (!raw) return null;
+    const { ts, temps } = JSON.parse(raw) as { ts: number; temps: Record<string, number> };
+    return Date.now() - ts < WX_TTL ? temps : null;
+  } catch { return null; }
+}
+
+function wxSet(temps: Record<string, number>) {
+  try { sessionStorage.setItem(WX_KEY, JSON.stringify({ ts: Date.now(), temps })); } catch {}
+}
+
+function useWeatherTemps(): Record<string, number> {
+  const [temps, setTemps] = useState<Record<string, number>>(() => wxGet() ?? {});
+  useEffect(() => {
+    if (wxGet()) return;
+    Promise.allSettled(
+      Object.entries(DISTRICT_GEO).map(async ([name, { lat, lon }]) => {
+        const r = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+          `&daily=temperature_2m_max&timezone=Asia%2FKolkata&forecast_days=1`
+        );
+        const j = await r.json();
+        return { name, temp: Math.round(j.daily.temperature_2m_max[0] as number) };
+      })
+    ).then(results => {
+      const t: Record<string, number> = {};
+      results.forEach(r => { if (r.status === "fulfilled") t[r.value.name] = r.value.temp; });
+      setTemps(t);
+      wxSet(t);
+    });
+  }, []);
+  return temps;
+}
+
 const ML: Record<string, string> = {
   Thiruvananthapuram: "തിരുവനന്തപുരം",
   Kollam: "കൊല്ലം",
@@ -116,7 +173,7 @@ function LatestReports({ district, feed, latestReport, lang }: { district: strin
   );
 }
 
-function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: FeedItem[]; lang: "en" | "ml"; onOpen: () => void; }) {
+function DistrictCard({ d, feed, lang, temp, onOpen }: { d: DistrictSummary; feed: FeedItem[]; lang: "en" | "ml"; temp?: number; onOpen: () => void; }) {
   const cfg = LEVEL_CFG[d.level] ?? LEVEL_CFG.GRAY;
   const hasData = d.total > 0;
   const gradId = `g${d.district.replace(/\W/g, '')}`;
@@ -173,9 +230,16 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
         >
           {districtName}
         </span>
-        <span style={{ fontSize: "13px", fontWeight: 800, color: cfg.color, flexShrink: 0, letterSpacing: "-0.3px" }}>
-          {d.hot_percentage.toFixed(1)}%
-        </span>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", flexShrink: 0 }}>
+          <span style={{ fontSize: "13px", fontWeight: 800, color: cfg.color, letterSpacing: "-0.3px" }}>
+            {d.hot_percentage.toFixed(1)}%
+          </span>
+          {temp !== undefined && (
+            <span style={{ fontSize: "9px", fontWeight: 600, color: "#7D7D7D", marginTop: "1px" }}>
+              {temp}°C
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Row 2: Sparkline or no-data flat line */}
@@ -282,6 +346,7 @@ function DistrictCard({ d, feed, lang, onOpen }: { d: DistrictSummary; feed: Fee
 export default function DistrictGrid() {
   const feed = useStore((s) => s.feed);
   const lang = useStore((s) => s.lang);
+  const temps = useWeatherTemps();
   const { data, isLoading } = useQuery({
     queryKey: ["districts"],
     queryFn: fetchDistricts,
@@ -321,7 +386,7 @@ export default function DistrictGrid() {
         ) : (
           <div className="district-grid-css" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: "10px" }}>
             {districts.map((d: DistrictSummary) => (
-              <DistrictCard key={d.district} d={d} feed={feed} lang={lang} onOpen={() => setSelected(d)} />
+              <DistrictCard key={d.district} d={d} feed={feed} lang={lang} temp={temps[d.district]} onOpen={() => setSelected(d)} />
             ))}
           </div>
         )}
