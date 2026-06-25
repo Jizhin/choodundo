@@ -16,7 +16,7 @@ const BASE = import.meta.env.VITE_API_BASE_URL ?? "";
 
 const api = axios.create({
   baseURL: `${BASE}/api`,
-  timeout: 12000,
+  timeout: 30000,
 });
 
 export async function fetchFeed(limit = 50): Promise<FeedItem[]> {
