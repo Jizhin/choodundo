@@ -8,23 +8,13 @@ import DistrictGrid from "./components/DistrictGrid";
 import MinimalFooter from "./components/MinimalFooter";
 import UpdateBanner from "./components/UpdateBanner";
 import WelcomeScreen from "./components/WelcomeScreen";
-import LoadingScreen from "./components/LoadingScreen";
 
-const SEEN_KEY    = "cu_welcome_seen";
-const LOADING_KEY = "cu_loading_seen";
-
-type Phase = "welcome" | "loading" | "ready";
-
-function initialPhase(): Phase {
-  if (!sessionStorage.getItem(SEEN_KEY))    return "welcome";
-  if (!sessionStorage.getItem(LOADING_KEY)) return "loading";
-  return "ready";
-}
+const SEEN_KEY = "cu_welcome_seen";
 
 export default function App() {
   useLiveSocket();
   useKeepAlive();
-  const [phase, setPhase] = useState<Phase>(initialPhase);
+  const [showWelcome, setShowWelcome] = useState(() => !sessionStorage.getItem(SEEN_KEY));
 
   return (
     <div
@@ -35,12 +25,7 @@ export default function App() {
         fontFamily: '"Inter", system-ui, sans-serif',
       }}
     >
-      {phase === "welcome" && (
-        <WelcomeScreen onDone={() => setPhase("loading")} />
-      )}
-      {phase === "loading" && (
-        <LoadingScreen onDone={() => { sessionStorage.setItem(LOADING_KEY, "1"); setPhase("ready"); }} />
-      )}
+      {showWelcome && <WelcomeScreen onDone={() => setShowWelcome(false)} />}
       <Header />
       <UpdateBanner />
       <HeroSection />
