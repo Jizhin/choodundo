@@ -1,11 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../store/useStore";
 
 const SEEN_KEY = "cu_welcome_seen";
+const PING_URL = (import.meta.env.VITE_API_BASE_URL ?? "") + "/api/ping";
+const WARM_THRESHOLD_MS = 2500; // if no response within this, show warm-up UI
+const MAX_WARMUP_S = 50;        // Render cold-start worst case
+
+type ServerState = "checking" | "ready" | "warming";
 
 export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
   const lang = useStore((s) => s.lang);
   const [exiting, setExiting] = useState(false);
+  const [serverState, setServerState] = useState<ServerState>("checking");
+  const [elapsed, setElapsed] = useState(0);
+  const doneRef = useRef(false);
 
   function dismiss() {
     setExiting(true);
@@ -21,6 +29,48 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Ping the backend to detect cold-start
+  useEffect(() => {
+    const startTs = Date.now();
+    doneRef.current = false;
+
+    const tryPing = async () => {
+      try {
+        const r = await fetch(PING_URL, { cache: "no-store" });
+        if (r.ok && !doneRef.current) {
+          doneRef.current = true;
+          setServerState("ready");
+        }
+      } catch {
+        // still cold
+      }
+    };
+
+    tryPing();
+
+    // After threshold with no response, switch to warming UI
+    const warmTimer = window.setTimeout(() => {
+      if (!doneRef.current) setServerState("warming");
+    }, WARM_THRESHOLD_MS);
+
+    // Retry every 3s until ready
+    const retryId = window.setInterval(tryPing, 3000);
+
+    // Elapsed counter for progress display
+    const tickId = window.setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTs) / 1000));
+    }, 1000);
+
+    return () => {
+      doneRef.current = true;
+      clearTimeout(warmTimer);
+      clearInterval(retryId);
+      clearInterval(tickId);
+    };
+  }, []);
+
+  const progressPct = Math.min(100, (elapsed / MAX_WARMUP_S) * 100);
 
   return (
     <div
@@ -190,29 +240,91 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
         {lang === "ml" ? "ആരംഭിക്കൂ →" : "Get Started →"}
       </button>
 
-      {/* Loading pulse */}
+      {/* Server status — bottom of screen */}
       <div
         style={{
           position: "absolute",
           bottom: "24px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "min(320px, 90vw)",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          gap: "7px",
+          gap: "8px",
         }}
       >
-        <span
-          style={{
-            width: "6px",
-            height: "6px",
-            borderRadius: "50%",
-            background: "#FF3B30",
-            display: "inline-block",
-            animation: "cu-pulse 1.4s ease-in-out infinite",
-          }}
-        />
-        <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
-          {lang === "ml" ? "ഡേറ്റ ലോഡ് ചെയ്യുന്നു…" : "Loading live data…"}
-        </span>
+        {serverState === "checking" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "#FF3B30",
+                display: "inline-block",
+                animation: "cu-pulse 1.4s ease-in-out infinite",
+              }}
+            />
+            <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
+              {lang === "ml" ? "കണക്‌റ്റ് ചെയ്യുന്നു…" : "Connecting to server…"}
+            </span>
+          </div>
+        )}
+
+        {serverState === "warming" && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  background: "#FF9800",
+                  display: "inline-block",
+                  animation: "cu-pulse 1.4s ease-in-out infinite",
+                }}
+              />
+              <span style={{ fontSize: "11px", color: "rgba(255,152,0,0.8)", letterSpacing: "0.04em" }}>
+                {lang === "ml"
+                  ? `സെർവർ ഓണാകുന്നു… (${elapsed}s)`
+                  : `Server is starting up… (${elapsed}s)`}
+              </span>
+            </div>
+            <div
+              style={{
+                width: "100%",
+                height: "2px",
+                background: "rgba(255,255,255,0.08)",
+                borderRadius: "1px",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progressPct}%`,
+                  background: "#FF9800",
+                  borderRadius: "1px",
+                  transition: "width 1s linear",
+                }}
+              />
+            </div>
+            <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.18)", textAlign: "center" }}>
+              {lang === "ml"
+                ? "ഫ്രീ ടയർ സ്ലീപ്പ് മോഡിൽ നിന്ന് ഉണരുന്നു — ~30s കാത്തിരിക്കൂ"
+                : "Free tier waking from sleep — usually takes ~30s"}
+            </span>
+          </>
+        )}
+
+        {serverState === "ready" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
+            <span style={{ fontSize: "11px", color: "#22C55E", letterSpacing: "0.05em" }}>
+              {lang === "ml" ? "✓ സെർവർ റെഡി" : "✓ Server ready"}
+            </span>
+          </div>
+        )}
       </div>
 
       <style>{`

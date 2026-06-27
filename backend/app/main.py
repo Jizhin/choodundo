@@ -73,3 +73,8 @@ async def health() -> dict:
 @app.get("/api/health", tags=["health"])
 async def api_health() -> dict:
     return await health()
+
+
+@app.get("/api/ping", tags=["health"])
+async def ping() -> dict:
+    return {"ok": True}

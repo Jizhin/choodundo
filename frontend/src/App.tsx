@@ -1,18 +1,30 @@
 import { useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { useLiveSocket } from "./hooks/useLiveSocket";
+import { useKeepAlive } from "./hooks/useKeepAlive";
 import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
 import DistrictGrid from "./components/DistrictGrid";
 import MinimalFooter from "./components/MinimalFooter";
 import UpdateBanner from "./components/UpdateBanner";
 import WelcomeScreen from "./components/WelcomeScreen";
+import LoadingScreen from "./components/LoadingScreen";
 
-const SEEN_KEY = "cu_welcome_seen";
+const SEEN_KEY    = "cu_welcome_seen";
+const LOADING_KEY = "cu_loading_seen";
+
+type Phase = "welcome" | "loading" | "ready";
+
+function initialPhase(): Phase {
+  if (!sessionStorage.getItem(SEEN_KEY))    return "welcome";
+  if (!sessionStorage.getItem(LOADING_KEY)) return "loading";
+  return "ready";
+}
 
 export default function App() {
   useLiveSocket();
-  const [showWelcome, setShowWelcome] = useState(() => !sessionStorage.getItem(SEEN_KEY));
+  useKeepAlive();
+  const [phase, setPhase] = useState<Phase>(initialPhase);
 
   return (
     <div
@@ -23,7 +35,12 @@ export default function App() {
         fontFamily: '"Inter", system-ui, sans-serif',
       }}
     >
-      {showWelcome && <WelcomeScreen onDone={() => setShowWelcome(false)} />}
+      {phase === "welcome" && (
+        <WelcomeScreen onDone={() => setPhase("loading")} />
+      )}
+      {phase === "loading" && (
+        <LoadingScreen onDone={() => { sessionStorage.setItem(LOADING_KEY, "1"); setPhase("ready"); }} />
+      )}
       <Header />
       <UpdateBanner />
       <HeroSection />
