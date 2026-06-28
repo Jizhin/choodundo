@@ -1,0 +1,19 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes — Render free tier sleeps after 15
+  workflow_dispatch:           # allow manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Ping backend
+        run: |
+          echo "Pinging ${{ secrets.BACKEND_URL }}/api/ping"
+          curl -sf --max-time 60 "${{ secrets.BACKEND_URL }}/api/ping" \
+            && echo "Backend is awake" \
+            || echo "Ping returned non-200 (server may be cold-starting)"
