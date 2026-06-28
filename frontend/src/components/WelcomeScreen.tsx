@@ -8,15 +8,27 @@ const WARM_MS   = 2500;
 
 type ServerState = "checking" | "warming" | "ready";
 
+const MOTIV: { en: string; ml: string }[] = [
+  { en: "Real heat. Real people. Real Kerala.",         ml: "യഥാർത്ഥ ചൂട്. യഥാർത്ഥ ആളുകൾ. കേരളം." },
+  { en: "14 districts. One community.",                 ml: "14 ജില്ലകൾ. ഒരു സമൂഹം." },
+  { en: "Know the heat before you step out.",           ml: "പുറത്തിറങ്ങും മുമ്പ് ചൂട് അറിയൂ." },
+  { en: "Your report helps your neighbours stay safe.", ml: "നിങ്ങളുടെ റിപ്പോർട്ട് അയൽക്കാരെ സഹായിക്കും." },
+  { en: "Community-powered. Always live.",              ml: "ജനകീയ. എപ്പോഴും തത്സമയം." },
+  { en: "Together, we track Kerala's heat.",            ml: "ഒരുമിച്ച്, നാം ചൂട് ട്രാക്ക് ചെയ്യുന്നു." },
+  { en: "Be the voice of your neighbourhood.",          ml: "നിങ്ങളുടെ നാടിന്റെ ശബ്ദമായ് മാറൂ." },
+  { en: "Ground truth from every corner of Kerala.",   ml: "കേരളത്തിന്റെ ഓരോ കോണിൽ നിന്നും." },
+];
+
 export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
   const lang = useStore((s) => s.lang);
 
   const [exiting,     setExiting]     = useState(false);
   const [serverState, setServerState] = useState<ServerState>("checking");
-  const [elapsed,     setElapsed]     = useState(0);
   const [progress,    setProgress]    = useState(0);
   const [stepLabel,   setStepLabel]   = useState(lang === "ml" ? "കണക്‌റ്റ് ചെയ്യുന്നു…" : "Connecting…");
   const [loaded,      setLoaded]      = useState(false);
+  const [msgIdx,      setMsgIdx]      = useState(0);
+  const [msgVisible,  setMsgVisible]  = useState(true);
 
   const serverDoneRef = useRef(false);
   const apiDoneRef    = useRef(false);
@@ -27,6 +39,16 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
     sessionStorage.setItem(SEEN_KEY, "1");
     setTimeout(onDone, 380);
   }
+
+  // Cycle motivational messages while loading
+  useEffect(() => {
+    if (loaded) return;
+    const id = setInterval(() => {
+      setMsgVisible(false);
+      setTimeout(() => { setMsgIdx((i) => (i + 1) % MOTIV.length); setMsgVisible(true); }, 320);
+    }, 2800);
+    return () => clearInterval(id);
+  }, [loaded]);
 
   // Keyboard shortcut — only works once loaded
   useEffect(() => {
@@ -53,15 +75,13 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
     };
 
     tryPing();
-    const warmTimer  = window.setTimeout(() => { if (!serverDoneRef.current) setServerState("warming"); }, WARM_MS);
-    const retryId    = window.setInterval(tryPing, 3000);
-    const elapsedId  = window.setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    const warmTimer = window.setTimeout(() => { if (!serverDoneRef.current) setServerState("warming"); }, WARM_MS);
+    const retryId   = window.setInterval(tryPing, 3000);
 
     return () => {
       serverDoneRef.current = true;
       clearTimeout(warmTimer);
       clearInterval(retryId);
-      clearInterval(elapsedId);
     };
   }, []);
 
@@ -251,46 +271,30 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
           : (lang === "ml" ? "ലോഡ് ചെയ്യുന്നു…" : "Loading…")}
       </button>
 
-      {/* Progress + server status */}
-      <div style={{ width: "min(360px, 90vw)", display: "flex", flexDirection: "column", gap: "8px" }}>
-        {/* Step label + percentage */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <span
-              style={{
-                width: "6px",
-                height: "6px",
-                borderRadius: "50%",
-                background: dotColor,
-                display: "inline-block",
-                flexShrink: 0,
-                animation: loaded ? "none" : "cu-pulse 1.4s ease-in-out infinite",
-                transition: "background 0.4s ease",
-              }}
-            />
-            <span style={{
-              fontSize: "11px",
-              color: loaded ? "#22C55E" : serverState === "warming" ? "rgba(255,152,0,0.8)" : "rgba(255,255,255,0.3)",
-              letterSpacing: "0.04em",
-              fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit",
-              transition: "color 0.4s ease",
-            }}>
-              {loaded
-                ? stepLabel
-                : serverState === "warming"
-                  ? (lang === "ml" ? `സെർവർ ഓണാകുന്നു… (${elapsed}s)` : `Server starting… (${elapsed}s)`)
-                  : serverState === "ready"
-                    ? stepLabel
-                    : (lang === "ml" ? "കണക്‌റ്റ് ചെയ്യുന്നു…" : "Connecting…")}
-            </span>
-          </div>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: barColor, fontVariantNumeric: "tabular-nums", transition: "color 0.4s ease" }}>
-            {Math.round(progressPct)}%
-          </span>
-        </div>
+      {/* Motivational message + progress */}
+      <div style={{ width: "min(360px, 90vw)", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+        {/* Cycling motivational text */}
+        <p
+          style={{
+            margin: 0,
+            fontSize: "12px",
+            color: loaded ? "#22C55E" : "rgba(255,255,255,0.38)",
+            textAlign: "center",
+            fontFamily: lang === "ml" ? '"Noto Sans Malayalam", "Inter", sans-serif' : "inherit",
+            letterSpacing: "0.03em",
+            minHeight: "18px",
+            opacity: msgVisible ? 1 : 0,
+            transform: msgVisible ? "translateY(0)" : "translateY(6px)",
+            transition: "opacity 0.32s ease, transform 0.32s ease, color 0.4s ease",
+          }}
+        >
+          {loaded
+            ? (lang === "ml" ? "✓ റെഡി! ആരംഭിക്കൂ." : "✓ Live data ready. Let's go!")
+            : (lang === "ml" ? MOTIV[msgIdx].ml : MOTIV[msgIdx].en)}
+        </p>
 
         {/* Progress bar */}
-        <div style={{ height: "3px", background: "rgba(255,255,255,0.07)", borderRadius: "2px", overflow: "hidden" }}>
+        <div style={{ width: "100%", height: "3px", background: "rgba(255,255,255,0.07)", borderRadius: "2px", overflow: "hidden" }}>
           <div
             style={{
               height: "100%",
@@ -302,13 +306,6 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
             }}
           />
         </div>
-
-        {/* Extra hint when server is cold */}
-        {serverState === "warming" && !loaded && (
-          <p style={{ margin: 0, fontSize: "10px", color: "rgba(255,255,255,0.18)", textAlign: "center" }}>
-            {lang === "ml" ? "ഫ്രീ ടയർ ഉണരുന്നു — ~30s കാത്തിരിക്കൂ" : "Free tier waking from sleep — usually ~30s"}
-          </p>
-        )}
       </div>
 
       <style>{`
