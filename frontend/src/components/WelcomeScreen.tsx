@@ -25,7 +25,6 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
   const [exiting,     setExiting]     = useState(false);
   const [serverState, setServerState] = useState<ServerState>("checking");
   const [progress,    setProgress]    = useState(0);
-  const [stepLabel,   setStepLabel]   = useState(lang === "ml" ? "കണക്‌റ്റ് ചെയ്യുന്നു…" : "Connecting…");
   const [loaded,      setLoaded]      = useState(false);
   const [msgIdx,      setMsgIdx]      = useState(0);
   const [msgVisible,  setMsgVisible]  = useState(true);
@@ -61,7 +60,6 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
 
   // ── Server warm-up ping ──────────────────────────────────────────────────
   useEffect(() => {
-    const start = Date.now();
     serverDoneRef.current = false;
 
     const tryPing = async () => {
@@ -93,14 +91,11 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
       if (!d || !s || apiDoneRef.current) return;
       apiDoneRef.current = true;
       setProgress(100);
-      setStepLabel(lang === "ml" ? "✓ റെഡി!" : "✓ Ready!");
       setLoaded(true);
     };
 
-    setStepLabel(lang === "ml" ? "ജില്ലകൾ ലോഡ് ചെയ്യുന്നു…" : "Loading districts…");
-
     fetchDistricts()
-      .then(() => { d = true; setProgress((p) => Math.max(p, 55)); setStepLabel(lang === "ml" ? "സ്ഥിതിവിവരക്കണക്ക്…" : "Loading stats…"); check(); })
+      .then(() => { d = true; setProgress((p) => Math.max(p, 55)); check(); })
       .catch(() => { d = true; check(); });
 
     fetchStats()
@@ -127,8 +122,7 @@ export default function WelcomeScreen({ onDone }: { onDone: () => void }) {
   }, []);
 
   // Derived colours
-  const barColor  = loaded ? "#FF3B30" : serverState === "warming" ? "#FF9800" : "rgba(255,255,255,0.35)";
-  const dotColor  = serverState === "ready" ? "#22C55E" : serverState === "warming" ? "#FF9800" : "rgba(255,255,255,0.3)";
+  const barColor    = loaded ? "#FF3B30" : serverState === "warming" ? "#FF9800" : "rgba(255,255,255,0.35)";
   const progressPct = Math.min(100, progress);
 
   return (
